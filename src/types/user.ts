@@ -11,5 +11,6 @@ export interface User {
   hours: number;         
   points: number;        
   createdAt: string;     
-  updatedAt: string;     
+  updatedAt: string;    
+  isBanned: boolean; 
 }
