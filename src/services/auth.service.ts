@@ -72,42 +72,49 @@ export const login = async (
   email: string,
   password: string,
 ): Promise<LoginResponse> => {
-  const { data } = await axios.post<BackendLoginResponse>('/auth/login', {
-    email,
-    password,
-  });
+  try {
+    const { data } = await axios.post<BackendLoginResponse>('/api/auth/login', {
+      email,
+      password,
+    });
 
-  // ตรวจสอบเพื่อความปลอดภัย
-  if (!data.success || !data.data) {
-    throw new Error(data.message || 'เข้าสู่ระบบไม่สำเร็จ');
+    // ตรวจสอบเพื่อความปลอดภัย
+    if (!data.success || !data.data) {
+      throw new Error(data.message || 'เข้าสู่ระบบไม่สำเร็จ');
+    }
+
+    // แปลงข้อมูลให้ตรงกับรูปแบบที่ Frontend ต้องการ
+    const backendUser = data.data.user;
+    
+    // สร้าง user ในรูปแบบที่ Frontend ต้องการ
+    const user: User = {
+      id: String(backendUser.id),
+      sid: backendUser.student_id,
+      firstname: backendUser.firstname,
+      lastname: backendUser.lastname,
+      email: backendUser.email,
+      role: backendUser.role as User['role'],
+      avatarUrl: backendUser.profile_image,
+      hours: backendUser.total_hours || 0,
+      points: backendUser.total_points || 0,
+      createdAt: backendUser.created_at,
+      updatedAt: backendUser.created_at,
+    };
+
+    console.log('Login successful, user role:', user.role);
+
+    return {
+      accessToken: data.data.token,
+      user,
+    };
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
   }
-
-  // แปลงข้อมูลให้ตรงกับรูปแบบที่ Frontend ต้องการ
-  const backendUser = data.data.user;
-  
-  // สร้าง user ในรูปแบบที่ Frontend ต้องการ
-  const user: User = {
-    id: String(backendUser.id),
-    sid: backendUser.student_id,
-    firstname: backendUser.firstname,
-    lastname: backendUser.lastname,
-    email: backendUser.email,
-    role: backendUser.role as User['role'],
-    avatarUrl: backendUser.profile_image,
-    hours: backendUser.total_hours || 0,
-    points: backendUser.total_points || 0,
-    createdAt: backendUser.created_at,
-    updatedAt: backendUser.created_at,
-  };
-
-  return {
-    accessToken: data.data.token,
-    user,
-  };
 };
 
 export const me = async (): Promise<User> => {
-  const { data } = await axios.get<{success: boolean; data: any}>('/auth/me');
+  const { data } = await axios.get<{success: boolean; data: any}>('/api/auth/me');
   
   if (!data.success || !data.data) {
     throw new Error('ไม่สามารถดึงข้อมูลผู้ใช้ได้');
@@ -131,7 +138,7 @@ export const me = async (): Promise<User> => {
 };
 
 export const refresh = async (): Promise<{accessToken: string}> => {
-  const { data } = await axios.post<{success: boolean; data: {token: string}}>('/auth/refresh');
+  const { data } = await axios.post<{success: boolean; data: {token: string}}>('/api/auth/refresh');
   
   if (!data.success || !data.data) {
     throw new Error('ไม่สามารถรีเฟรชโทเคนได้');

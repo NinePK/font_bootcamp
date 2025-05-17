@@ -75,11 +75,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // ฟังก์ชันเข้าสู่ระบบด้วย email และ password
   const loginAction = useCallback(async (email: string, password: string) => {
     try {
-      const { accessToken, user } = await authService.login(email, password);
+      const response = await authService.login(email, password);
+      const { accessToken, user } = response;
+      
+      // บันทึก token และข้อมูลผู้ใช้
       setToken(accessToken);
       setUser(user);
-      return { accessToken, user };
+      
+      // Log เพื่อตรวจสอบข้อมูลผู้ใช้ (โดยเฉพาะ role)
+      console.log('User logged in:', user);
+      
+      return response;
     } catch (error) {
+      console.error('Login failed:', error);
       throw error;
     }
   }, []);
@@ -114,7 +122,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setToken(saved);
         const user = await authService.me(); // ตรวจสอบ token, ดึง profile
         setUser(user);
+        console.log('User session restored:', user);
       } catch (err) {
+        console.error('Failed to restore session:', err);
         setToken(null);
         setUser(null);
       } finally {
