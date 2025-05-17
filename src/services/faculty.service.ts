@@ -15,7 +15,7 @@ export interface Major {
 export const facultyService = {
   // ดึงข้อมูลคณะทั้งหมด
   async getAllFaculties(): Promise<Faculty[]> {
-    const { data } = await axios.get<{ success: boolean; data: Faculty[] }>('/faculties');
+    const { data } = await axios.get<{ success: boolean; data: Faculty[] }>('/api/faculties');
     
     if (!data.success) {
       throw new Error('ไม่สามารถดึงข้อมูลคณะได้');
@@ -26,7 +26,7 @@ export const facultyService = {
   
   // ดึงข้อมูลสาขาทั้งหมด
   async getAllMajors(): Promise<Major[]> {
-    const { data } = await axios.get<{ success: boolean; data: Major[] }>('/majors');
+    const { data } = await axios.get<{ success: boolean; data: Major[] }>('/api/majors');
     
     if (!data.success) {
       throw new Error('ไม่สามารถดึงข้อมูลสาขาได้');
@@ -37,7 +37,7 @@ export const facultyService = {
   
   // ดึงข้อมูลสาขาตามคณะ
   async getMajorsByFacultyId(facultyId: number): Promise<Major[]> {
-    const { data } = await axios.get<{ success: boolean; data: Major[] }>(`/faculties/${facultyId}/majors`);
+    const { data } = await axios.get<{ success: boolean; data: Major[] }>(`/api/faculties/${facultyId}/majors`);
     
     if (!data.success) {
       throw new Error('ไม่สามารถดึงข้อมูลสาขาได้');

@@ -44,10 +44,10 @@ export default function Login() {
 
       const data: LoginResponse = await response.json();
 
-      if (data.success && data.token) {
+      if (data.success ) {
         
-        login(data.token);
-        localStorage.setItem('authToken', data.token); // ตัวอย่างการบันทึก token
+        // login(data.token);
+        // localStorage.setItem('authToken', data.token); // ตัวอย่างการบันทึก token
         navigate(ROUTES.STUDENT_DASHBOARD);
       } else {
         setError(data.message || 'Login failed. Please try again.');

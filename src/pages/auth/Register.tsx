@@ -309,26 +309,7 @@ export default function Register() {
               </motion.select>
             </motion.div>
 
-            <motion.div variants={itemVariants}>
-              <label className="font-semibold text-neutral-700 dark:text-neutral-200">สถานะ</label>
-              <motion.select
-                className="mt-2 w-full rounded-lg bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600 px-4 py-3 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                required
-                whileFocus={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <option value="" disabled>
-                  เลือกสถานะ
-                </option>
-                {statuses.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </motion.select>
-            </motion.div>
+           
 
             <motion.div variants={itemVariants}>
               <label className="font-semibold text-neutral-700 dark:text-neutral-200">รหัสผ่าน</label>

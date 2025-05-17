@@ -125,31 +125,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   /* ----------------------- interceptor refresh token ----------------------- */
-  useEffect(() => {
-    const id = axiosInstance.interceptors.response.use(
-      (res) => res,
-      async (error) => {
-        const original = error.config;
-        
-        if (
-          error.response?.status === 401 &&
-          !original._retry &&
-          localStorage.getItem(LOCAL_STORAGE_KEY)
-        ) {
-          original._retry = true;
-          try {
-            const { accessToken } = await authService.refresh();
-            setToken(accessToken);
-            return axiosInstance(original); // retry
-          } catch (_) {
-            logout();
-          }
-        }
+ useEffect(() => {
+  const id = axiosInstance.interceptors.response.use(
+    (res) => res,
+    async (error) => {
+      const original = error.config;
+      
+      if (
+        error.response?.status === 401 &&
+        error.response?.data?.message === 'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง' &&
+        !original._retry
+      ) {
+        // Token has been invalidated by another login
+        logout();
+        // Redirect to login page with a message
+        window.location.href = '/login?message=session_expired';
         return Promise.reject(error);
-      },
-    );
-    return () => axiosInstance.interceptors.response.eject(id);
-  }, [logout]);
+      }
+      
+      if (
+        error.response?.status === 401 &&
+        !original._retry &&
+        localStorage.getItem(LOCAL_STORAGE_KEY)
+      ) {
+        original._retry = true;
+        try {
+          const { accessToken } = await authService.refresh();
+          setToken(accessToken);
+          return axiosInstance(original); // retry
+        } catch (_) {
+          logout();
+        }
+      }
+      return Promise.reject(error);
+    },
+  );
+  return () => axiosInstance.interceptors.response.eject(id);
+}, [logout]);
 
 const value = useMemo<AuthContextValue>(
   () => ({ 

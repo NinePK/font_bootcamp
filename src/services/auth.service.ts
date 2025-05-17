@@ -39,7 +39,7 @@ export type LoginResponse = { accessToken: string; user: User };
 
 // สำหรับลงทะเบียนผู้ใช้ใหม่
 export const register = async (data: RegisterPayload): Promise<LoginResponse> => {
-  const { data: responseData } = await axios.post<BackendLoginResponse>('/auth/register', data);
+  const { data: responseData } = await axios.post<BackendLoginResponse>('/api/auth/register', data);
 
   if (!responseData.success || !responseData.data) {
     throw new Error(responseData.message || 'การลงทะเบียนไม่สำเร็จ');
