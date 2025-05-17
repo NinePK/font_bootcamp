@@ -1,18 +1,24 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { User } from '@/types/user';
 import * as authService from '@/services/auth.service';
 import axiosInstance from '@/services/axios';
 
+interface SignUpData {
+  firstname: string;
+  lastname: string;
+  studentId: string;
+  faculty: string;
+  field: string;
+  status: string;
+  email: string;
+  password: string;
+}
+
 interface AuthContextValue {
   user: User | null;
-  login: (sid: string, password: string) => Promise<void>;
+  login: (token: string) => void;
+  loginAction: (email: string, password: string) => Promise<{accessToken: string, user: User}>;
+  signUp: (data: SignUpData) => Promise<void>;
   logout: () => void;
   isAuthReady: boolean;
   setUser: (user: User) => void;
@@ -40,17 +46,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   /* ----------------------- actions ----------------------- */
-  const login = useCallback(async (sid: string, password: string) => {
-    const { accessToken, user } = await authService.login(sid, password);
-    setToken(accessToken);
-    setUser(user);
+  // ฟังก์ชันลงทะเบียนผู้ใช้ใหม่
+  const signUp = useCallback(async (data: SignUpData) => {
+    try {
+      // แปลงข้อมูลให้ตรงกับรูปแบบที่ API ต้องการ
+      const registerData = {
+        student_id: data.studentId,
+        email: data.email,
+        password: data.password,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        faculty_id: data.faculty ? parseInt(data.faculty) : undefined,
+        major_id: data.field ? parseInt(data.field) : undefined,
+      };
+      
+      // เรียกใช้ API ลงทะเบียน
+      const { accessToken, user } = await authService.register(registerData);
+      
+      // บันทึก token และข้อมูลผู้ใช้
+      setToken(accessToken);
+      setUser(user);
+    } catch (error) {
+      console.error('Signup failed:', error);
+      throw error;
+    }
   }, []);
 
+  // ฟังก์ชันเข้าสู่ระบบด้วย email และ password
+  const loginAction = useCallback(async (email: string, password: string) => {
+    try {
+      const { accessToken, user } = await authService.login(email, password);
+      setToken(accessToken);
+      setUser(user);
+      return { accessToken, user };
+    } catch (error) {
+      throw error;
+    }
+  }, []);
+
+  // ฟังก์ชันเข้าสู่ระบบด้วย token ที่มีอยู่แล้ว
+  const login = useCallback((token: string) => {
+    setToken(token);
+  }, []);
+
+  // ฟังก์ชันออกจากระบบ
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
   }, []);
 
+  // ฟังก์ชันอัปเดตข้อมูลผู้ใช้
   const setUserProfile = useCallback((user: User) => {
     setUser(user);
   }, []);
@@ -70,7 +115,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const user = await authService.me(); // ตรวจสอบ token, ดึง profile
         setUser(user);
       } catch (err) {
-        
         setToken(null);
         setUser(null);
       } finally {
@@ -107,17 +151,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => axiosInstance.interceptors.response.eject(id);
   }, [logout]);
 
-  const value = useMemo<AuthContextValue>(
-    () => ({ 
-      user, 
-      login, 
-      logout, 
-      isAuthReady,
-      setUser: setUserProfile 
-    }),
-    [user, login, logout, isAuthReady, setUserProfile]
-  );
-
+const value = useMemo<AuthContextValue>(
+  () => ({ 
+    user, 
+    login,
+    loginAction,
+    signUp,
+    logout, 
+    isAuthReady,
+    setUser: setUserProfile 
+  }),
+  [user, login, loginAction, signUp, logout, isAuthReady, setUserProfile]
+);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
