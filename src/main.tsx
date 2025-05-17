@@ -52,8 +52,8 @@ const router = createBrowserRouter([
   // Protected - Student
   {
   path: '/student',
-  // element: <ProtectedRoute allow={['STUDENT']}><DashboardLayout /></ProtectedRoute>,
-  element: <DashboardLayout />, 
+  element: <ProtectedRoute allow={['STUDENT']}><DashboardLayout /></ProtectedRoute>,
+  //element: <DashboardLayout />, 
   errorElement: <ErrorFallback />,
   children: [
     {

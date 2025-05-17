@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LogOut, Menu, X, User, Activity, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,6 +29,24 @@ export default function DashboardLayout() {
     logout();
     navigate('/login');
   };
+
+
+
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      // Call your API to fetch user data
+      const response = await fetch('/api/user'); // Replace with your actual API endpoint
+      const data = await response.json();
+      // Update user state with fetched data
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  }
+})
+
+
+
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-violet-100 to-violet-50 dark:from-neutral-900 dark:to-neutral-800 font-sans overflow-hidden">
